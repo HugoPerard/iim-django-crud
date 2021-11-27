@@ -61,6 +61,27 @@ def pages(request):
 
             return render(request, "home/fruits_add.html", {"form": form, "msg": msg})
 
+        if 'fruits_edit' in request.path:
+            fruitId = load_template
+            currentFruit = Fruit.objects.filter(id=fruitId)
+            form = FruitForm(request.POST or None)
+            form.fields['name'].initial = currentFruit[0].name
+            form.fields['description'].initial = currentFruit[0].description
+            form.fields['image'].initial = currentFruit[0].image
+            msg = None
+
+            if request.method == "POST":
+                if form.is_valid():
+                    name = form.cleaned_data.get("name")
+                    description = form.cleaned_data.get("description")
+                    image = form.cleaned_data.get("image")
+                    f = currentFruit.update(name=name, description=description, image=image)
+                    return redirect("/fruits.html")
+                else:
+                    msg = 'Erreur lors de la validation du formulaire'
+
+            return render(request, "home/fruits_edit.html", {"form": form, "msg": msg, "fruitId": fruitId})
+
         html_template = loader.get_template('home/' + load_template)
         return HttpResponse(html_template.render(context, request))
 
