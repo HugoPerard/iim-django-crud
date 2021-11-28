@@ -10,10 +10,11 @@ from django.template import loader
 from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.views import generic
+from django.utils import timezone
 
-from .forms import FruitForm
+from .forms import FruitForm, ChatForm
 
-from apps.home.models import Fruit
+from apps.home.models import Fruit, Chat
 
 # import the logging library
 import logging
@@ -81,6 +82,23 @@ def pages(request):
                     msg = 'Erreur lors de la validation du formulaire'
 
             return render(request, "home/fruits_edit.html", {"form": form, "msg": msg, "fruitId": fruitId})
+
+        if load_template == 'messagerie.html':
+            messages = Chat.objects.order_by('-pub_date')[:20]
+            form = ChatForm(request.POST or None)
+            msg = None
+
+            if request.method == "POST":
+                if form.is_valid():
+                    text = form.cleaned_data.get("text")
+                    logger.error("-----_______----", text)
+                    author = request.user.username
+                    pub_date = timezone.now()
+                    c = Chat.objects.create(text=text, author=author, pub_date=pub_date)
+                else:
+                    msg = 'Erreur lors de la validation du formulaire'
+
+            return render(request, "home/messagerie.html", {"form": form, "msg": msg, "messages": messages, "user": request.user.username})
 
         html_template = loader.get_template('home/' + load_template)
         return HttpResponse(html_template.render(context, request))

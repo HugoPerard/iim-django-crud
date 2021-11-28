@@ -30,3 +30,12 @@ class FruitForm(forms.Form):
                 "class": "form-control"
             }
         ))
+
+class ChatForm(forms.Form):
+    text = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Message",
+                "class": "form-control"
+            }
+        ))
